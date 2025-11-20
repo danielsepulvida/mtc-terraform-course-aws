@@ -67,8 +67,8 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name = "${var.app_name}-service"
-  #cluster         = aws_ecs_cluster.foo.id
+  name            = "${var.app_name}-service"
+  cluster         = var.cluster_arn
   task_definition = aws_ecs_task_definition.this.arn
   launch_type     = "FARGATE"
   desired_count   = 1
@@ -78,6 +78,31 @@ resource "aws_ecs_service" "this" {
     security_groups  = [var.app_security_group_id]
     assign_public_ip = var.is_public
   }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.this.arn
+    container_name   = var.app_name
+    container_port   = var.port
+  }
 }
 
+resource "aws_lb_target_group" "this" {
+  name        = "mtc-ecs-tg"
+  port        = var.port
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+}
 
+resource "aws_lb_listener_rule" "http_rule" {
+  listener_arn = var.alb_listener_arn
+  condition {
+    path_pattern {
+      values = [var.path_pattern]
+    }
+  }
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.this.arn
+  }
+}

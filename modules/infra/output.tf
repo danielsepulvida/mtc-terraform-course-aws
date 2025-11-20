@@ -11,7 +11,19 @@ output "public_subnets" {
 
 }
 
+# output "subnets" {
+#   value = aws_subnet.this
+# }
+
 output "cluster_arn" {
   value = aws_ecs_cluster.this.arn
 
+}
+
+output "vpc_id" {
+  value = aws_vpc.this.id
+}
+
+output "alb_listener_arn" {
+  value = aws_lb_listener.this.arn
 }

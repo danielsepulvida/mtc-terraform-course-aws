@@ -3,7 +3,7 @@
 module "infra" {
   source      = "./modules/infra"
   vpc_cidr    = "10.0.0.0/16"
-  num_subnets = 2
+  num_subnets = 7
   allowed_ips = ["0.0.0.0/0"]
 }
 
@@ -19,4 +19,7 @@ module "app" {
   subnets               = module.infra.public_subnets
   cluster_arn           = module.infra.cluster_arn
   is_public             = true
+  vpc_id                = module.infra.vpc_id
+  path_pattern          = "/*"
+  alb_listener_arn      = module.infra.alb_listener_arn
 }
